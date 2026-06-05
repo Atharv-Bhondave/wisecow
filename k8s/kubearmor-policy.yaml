@@ -1,0 +1,28 @@
+apiVersion: security.kubearmor.com/v1
+kind: KubeArmorPolicy
+metadata:
+  name: wisecow-secure-policy
+  namespace: default
+spec:
+  # This tells KubeArmor to apply these rules ONLY to your wisecow app
+  selector:
+    matchLabels:
+      app: wisecow
+
+  # PROCESS SECTION: What programs are allowed to run?
+  process:
+    severity: 5
+    action: Block # If it's not explicitly allowed, block it!
+    matchDirectories:
+      - dir: /bin/
+        recursive: true
+      - dir: /usr/bin/
+        recursive: true
+
+  # FILE SECTION: What files can be edited or looked at?
+  file:
+    severity: 5
+    action: Audit # Just watch and write down if someone touches this
+    matchDirectories:
+      - dir: /etc/
+        recursive: true
