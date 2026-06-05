@@ -28,7 +28,8 @@ This repository contains:
 │   ├── service.yaml              # Kubernetes Service Manifest
 │   └── kubearmor-policy.yaml     # Zero-Trust KubeArmor Security Policy
 ├── scripts/
-│   └── system_monitor.py         # Python System Health Monitoring Script
+│   ├── system_monitor.py         # Python System Health Monitoring Script
+│   └── app_health_checker.py     # Python Application Uptime Health Checker
 ├── Dockerfile                    # Application Containerization Config
 ├── wisecow.sh                    # Wisecow Bash Shell Application
 ├── kubearmor-violation.png       # Policy Violation Screenshot
@@ -127,17 +128,21 @@ To secure transit traffic to the Wisecow application with TLS, we can deploy an 
 
 ---
 
-## 📈 Problem Statement 2: System Health Monitoring Script
+## 📈 Problem Statement 2: System Health Monitoring & Application Health Checking
 
-The system health monitoring utility is implemented in Python under [system_monitor.py](file:///c:/Users/Admin/wisecow/scripts/system_monitor.py). It tracks hardware health stats and logs alerts when safe operating thresholds are breached.
+We have implemented two automation scripts using Python:
 
-### Key Capabilities:
-- **CPU Monitoring**: Triggers alert if CPU load > 80%.
-- **Memory Monitoring**: Triggers alert if RAM utilization > 80%.
-- **Disk Usage Monitoring**: Triggers alert if disk consumption > 80%.
+### 1. System Health Monitoring Script (`scripts/system_monitor.py`)
+This script tracks hardware performance metrics on the server and generates alerts when configured thresholds are exceeded.
+
+#### Key Capabilities:
+- **CPU Monitoring**: Triggers an alert if CPU load exceeds 80%.
+- **Memory Monitoring**: Triggers an alert if RAM utilization exceeds 80%.
+- **Disk Usage Monitoring**: Triggers an alert if disk consumption exceeds 80%.
+- **Process Count Monitoring**: Tracks the total number of running processes and alerts if the count exceeds 500.
 - **Log Integration**: Appends warning logs containing timestamps to `system_health.log` and prints live alerts to the console.
 
-### Execution:
+#### Execution:
 1. Ensure `psutil` is installed:
    ```bash
    pip install psutil
@@ -146,9 +151,29 @@ The system health monitoring utility is implemented in Python under [system_moni
    ```bash
    python scripts/system_monitor.py
    ```
-3. Read the logs:
+3. Read the logged alerts:
    ```bash
    cat system_health.log
+   ```
+
+---
+
+### 2. Application Health Checker (`scripts/app_health_checker.py`)
+This script performs automated status checks on a web application (e.g. Wisecow) using HTTP status codes to check whether the application is functioning correctly.
+
+#### Key Capabilities:
+- **HTTP Status Check**: Evaluates success based on standard HTTP status codes (2xx codes indicate **UP**; other codes indicate **DOWN**).
+- **Graceful Error Handling**: Detects and logs specific failures, distinguishing between HTTP errors (like 404, 500) and connection/reachability errors (like connection refused or DNS failure).
+- **Command-Line Arguments**: Accepts custom URL endpoints dynamically (falls back to `http://localhost:4499` if none is provided).
+
+#### Execution:
+1. Run the script (without parameters to check Wisecow locally):
+   ```bash
+   python scripts/app_health_checker.py
+   ```
+2. Run the script against a custom URL (e.g., Google or a production service):
+   ```bash
+   python scripts/app_health_checker.py https://www.google.com
    ```
 
 ---

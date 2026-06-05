@@ -9,6 +9,7 @@ logging.basicConfig(filename='system_health.log', level=logging.INFO,
 CPU_THRESHOLD = 80.0
 MEMORY_THRESHOLD = 80.0
 DISK_THRESHOLD = 80.0
+PROCESS_THRESHOLD = 500
 
 def check_system_health():
     # 1. Check CPU usage
@@ -29,6 +30,13 @@ def check_system_health():
     disk_info = psutil.disk_usage('/')
     if disk_info.percent > DISK_THRESHOLD:
         msg = f"ALERT: Low Disk Space detected: {disk_info.percent}% used"
+        print(msg)
+        logging.warning(msg)
+
+    # 4. Check Running Processes
+    process_count = len(psutil.pids())
+    if process_count > PROCESS_THRESHOLD:
+        msg = f"ALERT: High Number of Running Processes detected: {process_count}"
         print(msg)
         logging.warning(msg)
 
